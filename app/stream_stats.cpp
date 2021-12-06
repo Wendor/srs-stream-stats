@@ -294,7 +294,7 @@ int play_stream3(const char *url) {
     return 0;
 }
 
-int play_stream2(const char *url, short retry_times) {
+int play_stream2(const char *url, long retry_times) {
     short times = 1;
     while (times <= retry_times) {
         srs_human_json("Read packet error : %d.", ERROR_SOCKET_TIMEOUT);
@@ -309,7 +309,7 @@ int play_stream2(const char *url, short retry_times) {
     return 0;
 }
 
-int play_stream(const char *url, short retry_times) {
+int play_stream(const char *url, long retry_times) {
     vector<string> vect = spit_str(url, ',');
 
     vector<thread> th(vect.size());

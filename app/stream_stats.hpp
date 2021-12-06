@@ -12,8 +12,8 @@
 
 #endif //SRS_LIBRTMP_STREAM_STATS_H
 
-extern int play_stream(const char *url, short retry_times);
+extern int play_stream(const char *url, long retry_times);
 
-extern int play_stream2(const char *url, short retry_times);
+extern int play_stream2(const char *url, long retry_times);
 
 extern int play_stream3(const char *url);

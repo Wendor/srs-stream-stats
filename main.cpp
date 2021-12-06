@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
         exit(-1);
     }
 
-    play_stream(argv[1], (short) 30);
+    play_stream(argv[1], (long) 9999999);
 
     return 0;
 }
