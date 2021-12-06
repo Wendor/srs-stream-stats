@@ -951,8 +951,8 @@ extern const char* get_current_thread_id();
     #define srs_human_trace(msg, ...) printf("[%s] [%s]", srs_human_format_time(), get_current_thread_id());printf(msg, ##__VA_ARGS__);printf("\n")
     #define srs_human_verbose(msg, ...) printf("[%s] [%s]",srs_human_format_time(), get_current_thread_id());printf(msg, ##__VA_ARGS__);printf("\n")
     #define srs_human_raw(msg, ...) printf(msg, ##__VA_ARGS__)
-    #define srs_human_json(msg, ...) printf("{\"time\": \"%ld\", \"thread\": \"%s\", \"message\": \"",srs_unixtimestamp(), get_current_thread_id());printf(msg, ##__VA_ARGS__);printf("\"}\n")
-    #define srs_human_json_parts(msg, ...) printf("{\"time\": \"%ld\", \"thread\": \"%s\", ", srs_unixtimestamp(), get_current_thread_id());printf(msg, ##__VA_ARGS__);printf("}\n")
+    #define srs_human_json(msg, ...) printf("{\"time\": \"%s\", \"thread\": \"%s\", \"type\": \"log\", \"message\": \"",srs_human_format_time(), get_current_thread_id());printf(msg, ##__VA_ARGS__);printf("\"}\n")
+    #define srs_human_json_parts(msg, ...) printf("{\"time\": \"%s\", \"thread\": \"%s\", ", srs_human_format_time(), get_current_thread_id());printf(msg, ##__VA_ARGS__);printf("}\n")
 #endif
 
 /*************************************************************

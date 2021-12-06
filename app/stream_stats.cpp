@@ -221,6 +221,7 @@ int play_stream3(const char *url) {
                 int bandwidth = total_length * 8 / count_internal_sec;
 
                 srs_human_json_parts(
+                    "\"type\":\"statistics\""
                     "\"stream\": \"%s\", \"bandwidth\": %d, \"keyframeInterval\": %d, \"fps\": %d, \"drops\": %.2f, "
                     "\"acodec\": \"%s\", \"vcodec\": \"%s\", \"width\": %d, \"height\": %d",
                     stream_name.c_str(), bandwidth, key_frame_interval, gfps, drop_frame_rate, a_codec.c_str(),
@@ -243,6 +244,7 @@ int play_stream3(const char *url) {
                 int32_t kframe_num_diff = total_v_frames - pre_kframe_num;
 
                 srs_human_json_parts(
+                    "\"type\":\"keyframe\""
                     "\"stream\": \"%s\", \"localTsKeyframe\": %ld, \"localTsDiff\": %ld, \"keyframePts\": %d, "
                     "\"ptsDiff\": %ld, \"frame\": %d, \"keyframeNumDiff\": %d, \"acodec\": \"%s\", \"vcodec\":\"%s\"",
                     stream_name.c_str(), now_kframe_ts, kframe_ts_diff, pts, kframe_pts_diff, total_v_frames,
