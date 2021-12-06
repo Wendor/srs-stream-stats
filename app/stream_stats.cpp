@@ -107,7 +107,7 @@ string get_stream_name(const char *url) {
 }
 
 int play_stream3(const char *url) {
-    srs_human_trace("start play stream, rtmp url: %s", url);
+    srs_human_json("start play stream, rtmp url: %s", url);
     srs_rtmp_t rtmp = srs_rtmp_create(url);
 
     string stream_name;
@@ -128,22 +128,22 @@ int play_stream3(const char *url) {
     int32_t pre_kframe_num = 0;
 
     if (srs_rtmp_handshake(rtmp) != 0) {
-        srs_human_trace("simple handshake failed.");
+        srs_human_json("simple handshake failed.");
         goto rtmp_destroy;
     }
-    srs_human_trace("simple handshake success");
+    srs_human_json("simple handshake success");
 
     if (srs_rtmp_connect_app(rtmp) != 0) {
-        srs_human_trace("connect vhost/app failed.");
+        srs_human_json("connect vhost/app failed.");
         goto rtmp_destroy;
     }
-    srs_human_trace("connect vhost/app success");
+    srs_human_json("connect vhost/app success");
 
     if (srs_rtmp_play_stream(rtmp) != 0) {
-        srs_human_trace("play stream failed.");
+        srs_human_json("play stream failed.");
         goto rtmp_destroy;
     }
-    srs_human_trace("play stream success");
+    srs_human_json("play stream success");
 
     SrsAvcAacCodec *srsAvcAacCodec;
     srsAvcAacCodec = new SrsAvcAacCodec();
@@ -158,7 +158,7 @@ int play_stream3(const char *url) {
         u_int32_t timestamp;
 
         if (srs_rtmp_read_packet(rtmp, &type, &timestamp, &data, &size) != 0) {
-            srs_human_trace("RTMP connection disconnected.");
+            srs_human_json("RTMP connection disconnected.");
             goto rtmp_destroy;
         }
 
@@ -196,7 +196,11 @@ int play_stream3(const char *url) {
                     gfps = 1000 / ((now_ts - pre_interval_ts) / v_frames);
                 }
 
-                int fps = 1000 / (timestamp - pre_timestamp);
+                int diff = timestamp - pre_timestamp;
+                int fps = 0;
+                if (diff != 0) {
+                    fps = 1000 / diff;
+                }
                 int total_frames = (int) (count_internal_sec * fps);
 
                 srsAvcAacCodec->video_avc_demux(data, size, srsCodecSample);
@@ -216,11 +220,12 @@ int play_stream3(const char *url) {
 
                 int bandwidth = total_length * 8 / count_internal_sec;
 
-                srs_human_trace(
-                        "Stream : %s, Bandwidth : %d bps, Keyframe Interval : %d, FPS : %d, Frame drops : %.2f %%, "
-                        "Audio codec : %s, Video codec : %s, Resolution: %d * %d",
-                        stream_name.c_str(), bandwidth, key_frame_interval, gfps, drop_frame_rate, a_codec.c_str(),
-                        v_codec.c_str(), width, height);
+                srs_human_json_parts(
+                    "\"stream\": \"%s\", \"bandwidth\": %d, \"keyFrameInterval\": %d, \"fps\": %d, \"drops\": %.2f, "
+                    "\"acodec\": \"%s\", \"vcodec\": \"%s\", \"width\": %d, \"height\": %d",
+                    stream_name.c_str(), bandwidth, key_frame_interval, gfps, drop_frame_rate, a_codec.c_str(),
+                    v_codec.c_str(), width, height
+                );
 
                 pre_interval_ts = now_ts;
                 key_frames = 0;
@@ -237,11 +242,12 @@ int play_stream3(const char *url) {
                 int64_t kframe_pts_diff = pts - pre_kframe_pts;
                 int32_t kframe_num_diff = total_v_frames - pre_kframe_num;
 
-                srs_human_trace(
-                        "Stream : %s, key frame local ts : %lld, local ts diff : %lld, Keyframe pts : %d, "
-                        "pts diff : %lld, Vframe number : %d, Keyframe num diff : %d, , Audio codec : %s, Video codec : %s",
-                        stream_name.c_str(), now_kframe_ts, kframe_ts_diff, pts, kframe_pts_diff, total_v_frames,
-                        kframe_num_diff, a_codec.c_str(), v_codec.c_str());
+                srs_human_json_parts(
+                    "\"stream\": \"%s\", \"localTsKeyFrameKey\": %ld, \"localTsDiff\": %ld, \"keyframePts\": %d, "
+                    "\"ptsDiff\": %ld, \"vFrameNumber\": %d, \"keyframeNumDiff\": %d, \"acodec\": \"%s\", \"vcodec\":\"%s\"",
+                    stream_name.c_str(), now_kframe_ts, kframe_ts_diff, pts, kframe_pts_diff, total_v_frames,
+                    kframe_num_diff, a_codec.c_str(), v_codec.c_str()
+                );
 
                 key_frames++;
                 pre_kframe_ts = now_kframe_ts;
@@ -282,12 +288,14 @@ int play_stream3(const char *url) {
 
     SrsAutoFree(SrsCodecSample, srsCodecSample);
     SrsAutoFree(SrsAvcAacCodec, srsAvcAacCodec);
+
+    return 0;
 }
 
 int play_stream2(const char *url, short retry_times) {
     short times = 1;
     while (times <= retry_times) {
-        srs_human_trace("Read packet error : %d.", ERROR_SOCKET_TIMEOUT);
+        srs_human_json("Read packet error : %d.", ERROR_SOCKET_TIMEOUT);
         play_stream3(url);
 
         times++;
@@ -295,7 +303,8 @@ int play_stream2(const char *url, short retry_times) {
         this_thread::sleep_for(chrono::seconds(1));
     }
 
-    srs_human_trace("Stop playing stream : %s.", url);
+    srs_human_json("Stop playing stream : %s.", url);
+    return 0;
 }
 
 int play_stream(const char *url, short retry_times) {
@@ -310,6 +319,7 @@ int play_stream(const char *url, short retry_times) {
     for (auto &j : th) {
         j.join();
     }
+    return 0;
 }
 
 

@@ -936,6 +936,8 @@ extern int srs_human_print_rtmp_packet4(char type, u_int32_t timestamp, char* da
 // log to console, for use srs-librtmp application.
 extern const char* srs_human_format_time();
 
+extern const std::time_t srs_unixtimestamp();
+
 extern const char* get_current_thread_id();
 
 // when disabled log, donot compile it.
@@ -943,10 +945,14 @@ extern const char* get_current_thread_id();
     #define srs_human_trace(msg, ...) (void)0
     #define srs_human_verbose(msg, ...) (void)0
     #define srs_human_raw(msg, ...) (void)0
+    #define srs_human_json(msg, ...) (void)0
+    #define srs_human_json_parts(msg, ...) (void)0
 #else
     #define srs_human_trace(msg, ...) printf("[%s] [%s]", srs_human_format_time(), get_current_thread_id());printf(msg, ##__VA_ARGS__);printf("\n")
     #define srs_human_verbose(msg, ...) printf("[%s] [%s]",srs_human_format_time(), get_current_thread_id());printf(msg, ##__VA_ARGS__);printf("\n")
     #define srs_human_raw(msg, ...) printf(msg, ##__VA_ARGS__)
+    #define srs_human_json(msg, ...) printf("{\"time\": \"%ld\", \"thread\": \"%s\", \"message\": \"",srs_unixtimestamp(), get_current_thread_id());printf(msg, ##__VA_ARGS__);printf("\"}\n")
+    #define srs_human_json_parts(msg, ...) printf("{\"time\": \"%ld\", \"thread\": \"%s\", ", srs_unixtimestamp(), get_current_thread_id());printf(msg, ##__VA_ARGS__);printf("}\n")
 #endif
 
 /*************************************************************
